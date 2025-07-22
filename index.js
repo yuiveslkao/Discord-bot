@@ -52,9 +52,9 @@ client.once('ready', () => {
 
             // 埋め込みメッセージを作成
             const embed = new EmbedBuilder()
-                .setTitle('⏰ 定期リマインダー')
+                .setTitle('⏰ リマインドだよ！')
                 .setColor(0xFFD700) //金色
-                .setDescription(`現在、未完了のタスクが ${tasks.length} 件あります。`);
+                .setDescription(`現在、未完了のタスクが ${tasks.length} 件あるよ！ちゃんと全部やってね？`);
             
             for (const task of tasks.slice(0, 5)) { // 一度に5件まで表示
                 embed.addFields({
@@ -65,7 +65,7 @@ client.once('ready', () => {
 
             // メンション付きでメッセージを送信
             await channel.send({
-                content: `<@${reminderUserId}>さん、タスクの確認の時間です！`,
+                content: `<@${reminderUserId}>おにいちゃん、タスクのリマインドだよ！`,
                 embeds: [embed],
             });
 
@@ -106,14 +106,14 @@ client.on('interactionCreate', async interaction => {
             const taskToUpdate = readTasks().find(t => t.id === id); // タイトル取得のため
             const updated = updateTask(id, { status: newStatus });
             responseMessage = updated
-                ? `✅ タスク「${taskToUpdate.title}」を「${newStatus}」に変更しました。`
-                : `❌ タスク(ID: \`${id}\`)が見つかりませんでした。`;
+                ? `✅ タスク「${taskToUpdate.title}」を「${newStatus}」に変更したよ！`
+                : `❌ タスク(ID: \`${id}\`)が見つからなかったよ...`;
         } else if (status === 'delete') {
             const taskToDelete = readTasks().find(t => t.id === id); // タイトル取得のため
             const deleted = deleteTask(id);
             responseMessage = deleted
-                ? `🗑️ タスク「${taskToDelete.title}」を削除しました。`
-                : `❌ タスク(ID: \`${id}\`)が見つかりませんでした。`;
+                ? `🗑️ タスク「${taskToDelete.title}」を削除したよ！`
+                : `❌ タスク(ID: \`${id}\`)が見つからなかったよ...`;
         }
 
         await interaction.update({ content: responseMessage, components: [] }); // ボタンを消してメッセージを更新
