@@ -31,7 +31,7 @@ client.once('ready', () => {
 
     // リマインダーを送る間隔（ミリ秒単位）
     // 例: 1時間ごと = 60 * 60 * 1000 = 3600000
-    const reminderInterval = 3600000; 
+    const reminderInterval = 3600000 * 6; // 6時間ごと
 
     // 定期実行処理
     setInterval(async () => {
@@ -42,7 +42,11 @@ client.once('ready', () => {
 
             // 未完了タスクがなければ何もしない
             if (tasks.length === 0) {
-                console.log('リマインダー：未完了タスクがないため、通知をスキップしました。');
+                const embed = new EmbedBuilder()
+                    .setTitle('⏰ リマインドだよ！')
+                    .setColor(0x00FF00) // 緑色
+                    .setDescription('現在、未完了のタスクはないよ！えらい！');
+                await client.channels.cache.get(reminderChannelId).send({ embeds: [embed] });
                 return;
             }
 
@@ -55,8 +59,8 @@ client.once('ready', () => {
                 .setTitle('⏰ リマインドだよ！')
                 .setColor(0xFFD700) //金色
                 .setDescription(`現在、未完了のタスクが ${tasks.length} 件あるよ！ちゃんと全部やってね？`);
-            
-            for (const task of tasks.slice(0, 5)) { // 一度に5件まで表示
+
+            for (const task of tasks.slice(0, 25)) { // 一度に25件まで表示
                 embed.addFields({
                     name: `【${task.status}】 ${task.title}`,
                     value: `**期限:** ${task.dueDate || 'なし'}\n**ID:** \`${task.id}\``,
