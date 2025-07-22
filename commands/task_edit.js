@@ -4,7 +4,7 @@ const { updateTask } = require('../utils/taskManager');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('task_edit')
-        .setDescription('既存のタスクを編集します。')
+        .setDescription('今あるタスクを編集するよ！')
         .addStringOption(option =>
             option.setName('id')
                 .setDescription('編集するタスクのID')
@@ -26,15 +26,15 @@ module.exports = {
         if (interaction.options.getString('notes')) updates.notes = interaction.options.getString('notes');
 
         if (Object.keys(updates).length === 0) {
-            await interaction.reply({ content: '編集する項目を少なくとも1つは指定してください。', ephemeral: true });
+            await interaction.reply({ content: '編集する項目を一つ以上指定してね！', ephemeral: true });
             return;
         }
 
         const updatedTask = updateTask(id, updates);
         if (updatedTask) {
-            await interaction.reply({ content: `✅ タスク(ID: \`${id}\`)を更新しました！`, ephemeral: true });
+            await interaction.reply({ content: `✅ タスク(ID: \`${id}\`)を更新したよ！`, ephemeral: true });
         } else {
-            await interaction.reply({ content: `❌ タスク(ID: \`${id}\`)が見つかりませんでした。`, ephemeral: true });
+            await interaction.reply({ content: `❌ タスク(ID: \`${id}\`)が見つからなかったよ...`, ephemeral: true });
         }
     },
 };

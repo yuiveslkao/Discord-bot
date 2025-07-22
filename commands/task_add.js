@@ -4,7 +4,7 @@ const { addTask } = require('../utils/taskManager');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('task_add')
-        .setDescription('新しいタスクを追加します。')
+        .setDescription('新しいタスクを追加するよ！')
         .addStringOption(option =>
             option.setName('title')
                 .setDescription('タスクのタイトル')
@@ -23,7 +23,7 @@ module.exports = {
         const newTask = addTask({ title, dueDate, notes });
 
         await interaction.reply({
-            content: `✅ タスクを追加しました！\n**タイトル:** ${newTask.title}\n**ID:** \`${newTask.id}\``,
+            content: `✅ タスクを追加したよ！頑張ってね！おにいちゃん！\n**タイトル:** ${newTask.title}\n**ID:** \`${newTask.id}\``,
             ephemeral: true // 自分にだけ見えるメッセージ
         });
     },

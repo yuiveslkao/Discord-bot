@@ -1,8 +1,11 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { Client, Collection, GatewayIntentBits } = require('discord.js');
-const { token } = require('./config.js');
-const { updateTask, deleteTask } = require('./utils/taskManager.js');
+// ↓↓ EmbedBuilder を discord.js からインポート
+const { Client, Collection, GatewayIntentBits, EmbedBuilder } = require('discord.js');
+// ↓↓ リマインダー用のIDを config.js からインポート
+const { token, reminderUserId, reminderChannelId } = require('./config.js');
+// ↓↓ readTasks を taskManager.js からインポート
+const { updateTask, deleteTask, readTasks } = require('./utils/taskManager.js');
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
@@ -20,8 +23,60 @@ for (const file of commandFiles) {
     }
 }
 
+// Botが準備できたときに一度だけ実行
 client.once('ready', () => {
-    console.log(`${client.user.tag}としてログインしました！`);
+	console.log(`${client.user.tag}としてログインしました！`);
+
+    // ▼▼▼ ここからリマインダー処理を追記 ▼▼▼
+
+    // リマインダーを送る間隔（ミリ秒単位）
+    // 例: 1時間ごと = 60 * 60 * 1000 = 3600000
+    const reminderInterval = 3600000; 
+
+    // 定期実行処理
+    setInterval(async () => {
+        try {
+            // 未完了・作業中のタスクを取得
+            const allTasks = readTasks();
+            const tasks = allTasks.filter(t => t.status !== '完了');
+
+            // 未完了タスクがなければ何もしない
+            if (tasks.length === 0) {
+                console.log('リマインダー：未完了タスクがないため、通知をスキップしました。');
+                return;
+            }
+
+            // リマインド先のチャンネルを取得
+            const channel = await client.channels.fetch(reminderChannelId);
+            if (!channel) return;
+
+            // 埋め込みメッセージを作成
+            const embed = new EmbedBuilder()
+                .setTitle('⏰ 定期リマインダー')
+                .setColor(0xFFD700) //金色
+                .setDescription(`現在、未完了のタスクが ${tasks.length} 件あります。`);
+            
+            for (const task of tasks.slice(0, 5)) { // 一度に5件まで表示
+                embed.addFields({
+                    name: `【${task.status}】 ${task.title}`,
+                    value: `**期限:** ${task.dueDate || 'なし'}\n**ID:** \`${task.id}\``,
+                });
+            }
+
+            // メンション付きでメッセージを送信
+            await channel.send({
+                content: `<@${reminderUserId}>さん、タスクの確認の時間です！`,
+                embeds: [embed],
+            });
+
+            console.log('リマインダーを送信しました。');
+
+        } catch (error) {
+            console.error('リマインダーの送信中にエラーが発生しました:', error);
+        }
+    }, reminderInterval);
+
+    // ▲▲▲ ここまでリマインダー処理 ▲▲▲
 });
 
 // interactionCreateイベントのリスナー
@@ -48,14 +103,16 @@ client.on('interactionCreate', async interaction => {
 
         if (status === 'done' || status === 'wip') {
             const newStatus = status === 'done' ? '完了' : '作業中';
+            const taskToUpdate = readTasks().find(t => t.id === id); // タイトル取得のため
             const updated = updateTask(id, { status: newStatus });
             responseMessage = updated
-                ? `✅ タスク(ID: \`${id}\`)のステータスを「${newStatus}」に変更しました。`
+                ? `✅ タスク「${taskToUpdate.title}」を「${newStatus}」に変更しました。`
                 : `❌ タスク(ID: \`${id}\`)が見つかりませんでした。`;
         } else if (status === 'delete') {
+            const taskToDelete = readTasks().find(t => t.id === id); // タイトル取得のため
             const deleted = deleteTask(id);
             responseMessage = deleted
-                ? `🗑️ タスク(ID: \`${id}\`)を削除しました。`
+                ? `🗑️ タスク「${taskToDelete.title}」を削除しました。`
                 : `❌ タスク(ID: \`${id}\`)が見つかりませんでした。`;
         }
 

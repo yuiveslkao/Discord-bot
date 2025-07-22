@@ -4,10 +4,10 @@ const { readTasks } = require('../utils/taskManager');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('task_show')
-        .setDescription('タスク一覧を表示します。')
+        .setDescription('タスク一覧を表示するよ！')
         .addStringOption(option =>
             option.setName('status')
-                .setDescription('表示するステータスで絞り込みます')
+                .setDescription('表示するステータスで絞り込むよ！')
                 .addChoices(
                     { name: '未着手', value: '未着手' },
                     { name: '作業中', value: '作業中' },
@@ -15,7 +15,7 @@ module.exports = {
                 ))
         .addStringOption(option =>
             option.setName('keyword')
-                .setDescription('タイトルや備考に含まれるキーワードで検索します')),
+                .setDescription('タイトルや備考に含まれるキーワードで検索するよ！')),
     async execute(interaction) {
         let tasks = readTasks();
         const statusFilter = interaction.options.getString('status');
@@ -37,7 +37,7 @@ module.exports = {
         }
 
         if (tasks.length === 0) {
-            await interaction.reply({ content: '表示するタスクがありません。', ephemeral: true });
+            await interaction.reply({ content: '表示するタスクがないよ！えらい！...おにいちゃんサボってないよね？', ephemeral: true });
             return;
         }
 
@@ -45,9 +45,9 @@ module.exports = {
         const embed = new EmbedBuilder()
             .setTitle('📝 タスク一覧')
             .setColor(0x0099FF)
-            .setDescription('タスクの詳細です。');
+            .setDescription('タスクの詳細だよ。');
 
-        for (const task of tasks.slice(0, 5)) { // 一度に表示するタスクは5件まで
+        for (const task of tasks.slice(0, 25)) { // 一度に表示するタスクは25件まで
             embed.addFields({
                 name: `【${task.status}】 ${task.title}`,
                 value: `**期限:** ${task.dueDate || 'なし'}\n**備考:** ${task.notes || 'なし'}\n**ID:** \`${task.id}\``,
@@ -75,7 +75,7 @@ module.exports = {
 
         // 注: ボタンは表示された最初のタスクにのみ対応する簡易的な実装です
         // 本格的には、各タスクにボタンをつけたり、セレクトメニューで操作対象を選ぶ必要があります
-        const replyContent = tasks.length > 0 ? 'IDを指定してボタンで操作してください（現在は表示された最初のタスクIDがボタンに設定されます）。' : ' ';
+        const replyContent = tasks.length > 0 ? 'IDを指定してボタンで操作してね（現在は表示された最初のタスクIDがボタンに設定されます）。' : ' ';
 
         await interaction.reply({ content: replyContent, embeds: [embed], components: [row] });
     },
