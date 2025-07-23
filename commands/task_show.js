@@ -40,6 +40,8 @@ module.exports = {
                     { name: '作成日が古い順', value: 'createdAt_asc' }
                 )),
     async execute(interaction) {
+        await interaction.deferReply({ ephemeral: true });
+
         const statusFilter = interaction.options.getString('status');
         const keywordFilter = interaction.options.getString('keyword');
         const sortOrder = interaction.options.getString('sort') || 'createdAt_desc';
@@ -90,7 +92,7 @@ module.exports = {
         tasks = getFilteredTasks();
 
         if (tasks.length === 0) {
-            await interaction.reply({ content: '表示するタスクがないよ！えらい！...おにいちゃんサボってないよね？', ephemeral: true });
+            await interaction.editReply({ content: '表示するタスクがないよ！えらい！...おにいちゃんサボってないよね？' });
             return;
         }
 
@@ -171,10 +173,10 @@ module.exports = {
             );
             components.push(paginationRow);
 
-            return { embeds: [embed], components, ephemeral: true };
+            return { embeds: [embed], components };
         };
 
-        const reply = await interaction.reply(generateReply(currentPage));
+        const reply = await interaction.editReply(generateReply(currentPage));
         const collector = reply.createMessageComponentCollector({ time: 300000 }); // 5分間
 
         collector.on('collect', async i => {
