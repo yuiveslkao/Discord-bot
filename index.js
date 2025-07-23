@@ -125,3 +125,21 @@ client.on('interactionCreate', async interaction => {
 });
 
 client.login(token);
+
+// --- ここからヘルスチェック機能 ---
+const express = require('express');
+const { startHealthCheckCron } = require('./utils/healthCheck.js');
+
+const app = express();
+const port = process.env.PORT || 8080;
+
+app.get('/', (req, res) => {
+  res.send('Discord bot is running!');
+});
+
+app.listen(port, () => {
+  console.log(`Health check server listening on port ${port}`);
+  // ヘルスチェックの定期実行を開始
+  startHealthCheckCron();
+});
+// --- ここまでヘルスチェック機能 ---
