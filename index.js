@@ -98,6 +98,7 @@ client.on('interactionCreate', async interaction => {
     }
     // ボタンの処理
     else if (interaction.isButton()) {
+        await interaction.deferUpdate();
         const [action, status, taskId] = interaction.customId.split('_');
 
         if (action !== 'task') return;
@@ -120,7 +121,7 @@ client.on('interactionCreate', async interaction => {
                 : `❌ タスク(ID: \`${id}\`)が見つからなかったよ...`;
         }
 
-        await interaction.update({ content: responseMessage, components: [] }); // ボタンを消してメッセージを更新
+        await interaction.editReply({ content: responseMessage, components: [] }); // ボタンを消してメッセージを更新
     }
 });
 
