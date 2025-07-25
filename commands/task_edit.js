@@ -26,15 +26,15 @@ module.exports = {
         if (interaction.options.getString('notes')) updates.notes = interaction.options.getString('notes');
 
         if (Object.keys(updates).length === 0) {
-            await interaction.reply({ content: '編集する項目を一つ以上指定してね！', ephemeral: true });
+            await interaction.reply({ content: '編集する項目を一つ以上指定してね！', flags: 64 });
             return;
         }
 
         const updatedTask = updateTask(id, updates);
         if (updatedTask) {
-            await interaction.reply({ content: `✅ タスク(ID: \`${id}\`)を更新したよ！`, ephemeral: true });
+            await interaction.reply({ content: `✅ タスク(ID: \`${id}\`)を更新したよ！`, flags: 64 });
         } else {
-            await interaction.reply({ content: `❌ タスク(ID: \`${id}\`)が見つからなかったよ...`, ephemeral: true });
+            await interaction.reply({ content: `❌ タスク(ID: \`${id}\`)が見つからなかったよ...`, flags: 64 });
         }
     },
 };

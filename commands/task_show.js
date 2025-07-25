@@ -40,7 +40,7 @@ module.exports = {
                     { name: '作成日が古い順', value: 'createdAt_asc' }
                 )),
     async execute(interaction) {
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: 64 });
 
         const statusFilter = interaction.options.getString('status');
         const keywordFilter = interaction.options.getString('keyword');
@@ -182,7 +182,7 @@ module.exports = {
 
         collector.on('collect', async i => {
             if (i.user.id !== interaction.user.id) {
-                await i.reply({ content: 'コマンドを使った本人しか操作できないよ！', ephemeral: true });
+                await i.reply({ content: 'コマンドを使った本人しか操作できないよ！', flags: 64 });
                 return;
             }
 

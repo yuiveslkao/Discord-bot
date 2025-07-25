@@ -24,7 +24,7 @@ module.exports = {
 
         await interaction.reply({
             content: `✅ タスクを追加したよ！頑張ってね！おにいちゃん！\n**タイトル:** ${newTask.title}\n**ID:** \`${newTask.id}\``,
-            ephemeral: true // 自分にだけ見えるメッセージ
+            flags: 64 // 自分にだけ見えるメッセージ
         });
     },
 };
