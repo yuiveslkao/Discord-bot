@@ -29,56 +29,66 @@ client.once('ready', () => {
 
     // ▼▼▼ ここからリマインダー処理を追記 ▼▼▼
 
-    // リマインダーを送る間隔（ミリ秒単位）
-    // 例: 1時間ごと = 60 * 60 * 1000 = 3600000
-    const reminderInterval = 3600000 * 6; // 6時間ごと
+    // リマインドする時間（時）のリスト
+    const reminderHours = [0, 6, 9, 12, 15, 18, 21];
+    let lastReminderHour = -1; // 最後にリマインドした時間を記録
 
-    // 定期実行処理
+    // 1分ごとに時間を確認
     setInterval(async () => {
-        try {
-            // 未完了・作業中のタスクを取得
-            const allTasks = readTasks();
-            const tasks = allTasks.filter(t => t.status !== '完了');
+        const now = new Date();
+        const currentHour = now.getHours();
+        const currentMinute = now.getMinutes();
 
-            // 未完了タスクがなければ何もしない
-            if (tasks.length === 0) {
+        // 指定された時間であり、かつその時間の0分であるか、
+        // そして、その時間にまだリマインドを送信していないかを確認
+        if (reminderHours.includes(currentHour) && currentMinute === 0 && currentHour !== lastReminderHour) {
+            lastReminderHour = currentHour; // リマインドした時間を記録
+
+            try {
+                // 未完了・作業中のタスクを取得
+                const allTasks = readTasks();
+                const tasks = allTasks.filter(t => t.status !== '完了');
+
+                // 未完了タスクがなければ何もしない
+                if (tasks.length === 0) {
+                    const embed = new EmbedBuilder()
+                        .setTitle('⏰ リマインドだよ！')
+                        .setColor(0x00FF00) // 緑色
+                        .setDescription('現在、未完了のタスクはないよ！えらい！');
+                    await client.channels.cache.get(reminderChannelId).send({ embeds: [embed] });
+                    return;
+                }
+
+                // リマインド先のチャンネルを取得
+                const channel = await client.channels.fetch(reminderChannelId);
+                if (!channel) return;
+
+                // 埋め込みメッセージを作成
                 const embed = new EmbedBuilder()
                     .setTitle('⏰ リマインドだよ！')
-                    .setColor(0x00FF00) // 緑色
-                    .setDescription('現在、未完了のタスクはないよ！えらい！');
-                await client.channels.cache.get(reminderChannelId).send({ embeds: [embed] });
-                return;
-            }
+                    .setColor(0xFFD700) //金色
+                    .setDescription(`現在、未完了のタスクが ${tasks.length} 件あるよ！ちゃんと全部やってね？`);
 
-            // リマインド先のチャンネルを取得
-            const channel = await client.channels.fetch(reminderChannelId);
-            if (!channel) return;
+                for (const task of tasks.slice(0, 25)) { // 一度に25件まで表示
+                    embed.addFields({
+                        name: `【${task.status}】 ${task.title}`,
+                        value: `**期限:** ${task.dueDate || 'なし'}\n**ID:** \`${task.id}\``,
+                    });
+                }
 
-            // 埋め込みメッセージを作成
-            const embed = new EmbedBuilder()
-                .setTitle('⏰ リマインドだよ！')
-                .setColor(0xFFD700) //金色
-                .setDescription(`現在、未完了のタスクが ${tasks.length} 件あるよ！ちゃんと全部やってね？`);
-
-            for (const task of tasks.slice(0, 25)) { // 一度に25件まで表示
-                embed.addFields({
-                    name: `【${task.status}】 ${task.title}`,
-                    value: `**期限:** ${task.dueDate || 'なし'}\n**ID:** \`${task.id}\``,
+                // メンション付きでメッセージを送信
+                await channel.send({
+                    content: `<@${reminderUserId}>おにいちゃん、タスクのリマインドだよ!`,
+                    embeds: [embed],
                 });
+
+                console.log('リマインダーを送信しました。');
+
+            } catch (error) {
+                console.error('リマインダーの送信中にエラーが発生しました:', error);
             }
-
-            // メンション付きでメッセージを送信
-            await channel.send({
-                content: `<@${reminderUserId}>おにいちゃん、タスクのリマインドだよ！`,
-                embeds: [embed],
-            });
-
-            console.log('リマインダーを送信しました。');
-
-        } catch (error) {
-            console.error('リマインダーの送信中にエラーが発生しました:', error);
         }
-    }, reminderInterval);
+    }, 60000); // 1分ごとに実行
 
     // ▲▲▲ ここまでリマインダー処理 ▲▲▲
 });
