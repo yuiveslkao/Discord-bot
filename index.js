@@ -106,33 +106,7 @@ client.on('interactionCreate', async interaction => {
             await interaction.reply({ content: 'コマンド実行中にエラーが発生しました。', ephemeral: true });
         }
     }
-    // ボタンの処理
-    else if (interaction.isButton()) {
-        await interaction.deferUpdate();
-        const [action, status, taskId] = interaction.customId.split('_');
-
-        if (action !== 'task') return;
-        
-        const id = Number(taskId);
-        let responseMessage = '';
-
-        if (status === 'done' || status === 'wip') {
-            const newStatus = status === 'done' ? '完了' : '作業中';
-            const taskToUpdate = readTasks().find(t => t.id === id); // タイトル取得のため
-            const updated = updateTask(id, { status: newStatus });
-            responseMessage = updated
-                ? `✅ タスク「${taskToUpdate.title}」を「${newStatus}」に変更したよ！`
-                : `❌ タスク(ID: \`${id}\`)が見つからなかったよ...`;
-        } else if (status === 'delete') {
-            const taskToDelete = readTasks().find(t => t.id === id); // タイトル取得のため
-            const deleted = deleteTask(id);
-            responseMessage = deleted
-                ? `🗑️ タスク「${taskToDelete.title}」を削除したよ！`
-                : `❌ タスク(ID: \`${id}\`)が見つからなかったよ...`;
-        }
-
-        await interaction.editReply({ content: responseMessage, components: [] }); // ボタンを消してメッセージを更新
-    }
+    
 });
 
 client.login(token);
