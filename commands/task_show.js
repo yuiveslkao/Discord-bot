@@ -178,6 +178,7 @@ module.exports = {
 
         const reply = await interaction.editReply(generateReply(currentPage));
         const collector = reply.createMessageComponentCollector({ time: 300000 }); // 5分間
+        let isProcessing = false;
 
         collector.on('collect', async i => {
             if (i.user.id !== interaction.user.id) {
@@ -185,43 +186,54 @@ module.exports = {
                 return;
             }
 
-            await i.deferUpdate();
+            if (isProcessing) return;
+            isProcessing = true;
 
-            if (i.isStringSelectMenu()) {
-                if (i.customId === 'select_task') {
-                    selectedTaskId = i.values[0];
-                }
-            } else if (i.isButton()) {
-                if (i.customId === 'next_page' || i.customId === 'prev_page') {
-                    selectedTaskId = null; // ページ変更時は選択をリセット
-                    currentPage += (i.customId === 'next_page' ? 1 : -1);
-                } else if (selectedTaskId) {
-                    const taskId = parseInt(selectedTaskId, 10);
-                    let actionTaken = false;
-                    if (i.customId === 'task_done') {
-                        updateTask(taskId, { status: '完了' });
-                        actionTaken = true;
-                    } else if (i.customId === 'task_wip') {
-                        updateTask(taskId, { status: '作業中' });
-                        actionTaken = true;
-                    } else if (i.customId === 'task_delete') {
-                        deleteTask(taskId);
-                        actionTaken = true;
+            try {
+                await i.deferUpdate();
+
+                if (i.isStringSelectMenu()) {
+                    if (i.customId === 'select_task') {
+                        selectedTaskId = i.values[0];
                     }
+                } else if (i.isButton()) {
+                    if (i.customId === 'next_page' || i.customId === 'prev_page') {
+                        selectedTaskId = null; // ページ変更時は選択をリセット
+                        currentPage += (i.customId === 'next_page' ? 1 : -1);
+                    } else if (selectedTaskId) {
+                        const taskId = parseInt(selectedTaskId, 10);
+                        let actionTaken = false;
+                        if (i.customId === 'task_done') {
+                            updateTask(taskId, { status: '完了' });
+                            actionTaken = true;
+                        } else if (i.customId === 'task_wip') {
+                            updateTask(taskId, { status: '作業中' });
+                            actionTaken = true;
+                        } else if (i.customId === 'task_delete') {
+                            deleteTask(taskId);
+                            actionTaken = true;
+                        }
 
-                    if (actionTaken) {
-                        // データを再取得して状態をリセット
-                        tasks = getFilteredTasks();
-                        selectedTaskId = null;
-                        const totalPages = Math.ceil(tasks.length / tasksPerPage) || 1;
-                        if (currentPage >= totalPages && currentPage > 0) {
-                            currentPage = totalPages - 1;
+                        if (actionTaken) {
+                            // データを再取得して状態をリセット
+                            tasks = getFilteredTasks();
+                            selectedTaskId = null;
+                            const totalPages = Math.ceil(tasks.length / tasksPerPage) || 1;
+                            if (currentPage >= totalPages && currentPage > 0) {
+                                currentPage = totalPages - 1;
+                            }
                         }
                     }
                 }
+                
+                await interaction.editReply(generateReply(currentPage));
+            } catch (error) {
+                if (error.code !== 40060) { // Interaction has already been acknowledged. は無視
+                    console.error('Collector error:', error);
+                }
+            } finally {
+                isProcessing = false;
             }
-            
-            await interaction.editReply(generateReply(currentPage));
         });
 
         collector.on('end', async () => {
