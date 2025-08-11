@@ -2,7 +2,7 @@ const cron = require('node-cron');
 
 const HEALTH_CHECK_URL = process.env.HEALTH_CHECK_URL || `http://localhost:${process.env.PORT || '8080'}`;
 
-// 10分ごとにヘルスチェックを実行
+// 3分ごとにヘルスチェックを実行
 function startHealthCheckCron() {
   cron.schedule('*/10 * * * *', async () => {
     try {
@@ -21,7 +21,7 @@ function startHealthCheckCron() {
     }
   });
 
-  console.log("ヘルスチェックの定期実行を開始しました (10分間隔)");
+  console.log("ヘルスチェックの定期実行を開始しました (3分間隔)");
 }
 
 module.exports = { startHealthCheckCron };
