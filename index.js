@@ -113,7 +113,6 @@ client.login(token);
 
 // --- ここからヘルスチェック機能 ---
 const express = require('express');
-const { startHealthCheckCron } = require('./utils/healthCheck.js');
 
 const app = express();
 const port = process.env.PORT || 8080;
@@ -124,7 +123,5 @@ app.get('/', (req, res) => {
 
 app.listen(port, () => {
   console.log(`Health check server listening on port ${port}`);
-  // ヘルスチェックの定期実行を開始
-  startHealthCheckCron();
 });
 // --- ここまでヘルスチェック機能 ---
