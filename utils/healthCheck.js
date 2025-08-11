@@ -4,7 +4,7 @@ const HEALTH_CHECK_URL = process.env.HEALTH_CHECK_URL || `http://localhost:${pro
 
 // 3分ごとにヘルスチェックを実行
 function startHealthCheckCron() {
-  cron.schedule('*/10 * * * *', async () => {
+  cron.schedule('*/3 * * * *', async () => {
     try {
       const now = new Date().toLocaleString('ja-JP');
       console.log(` [${now}] ヘルスチェック実行中... (${HEALTH_CHECK_URL})`);
