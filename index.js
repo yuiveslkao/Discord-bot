@@ -55,7 +55,7 @@ client.once('ready', () => {
                         .setTitle('⏰ リマインドだよ！')
                         .setColor(0x00FF00) // 緑色
                         .setDescription('現在、未完了のタスクはないよ！えらい！');
-                    await client.channels.cache.get(reminderChannelId).send({ embeds: [embed] });
+                    await client.channels.cache.get(reminderChannelId).send({ content: `<@${reminderUserId}>おにいちゃん、タスクのリマインドだよ!`, embeds: [embed] });
                     return;
                 }
 
