@@ -103,7 +103,7 @@ client.on('interactionCreate', async interaction => {
             await command.execute(interaction);
         } catch (error) {
             console.error(error);
-            await interaction.reply({ content: 'コマンド実行中にエラーが発生しました。', flags: 64 });
+            await interaction.reply({ content: 'コマンド実行中にエラーが発生しちゃった...ログを見て！おにいちゃん！', flags: 64 });
         }
     }
     
